@@ -1,8 +1,9 @@
 var deadZone = 0.2;
 var lastMessage;
+var host = window.location.hostname;
 
 function doConnect() {
-    websocket = new WebSocket("ws://golddigger:8000");
+    websocket = new WebSocket("ws://" + host + ":8000");
     websocket.onopen = function(evt) {
         onOpen(evt)
     };
@@ -92,6 +93,7 @@ function updateStatus() {
         var controller = controllers[j];
         var motionMessage;
         var turretMessage;
+        var bucketMessage;
         for (i = 0; i < controller.buttons.length; i++) {
             //console.log("button " + i + ": " + controller.buttons[i]);
         }
@@ -126,7 +128,16 @@ function updateStatus() {
             rate = Math.round(100 * Math.abs(axis[2]));
             turretMessage = 'right' + ' ' + rate.toString();
         }
-        doSend('track_' + motionMessage + '\n' + 'turret_' + turretMessage);
+        if (axis[3] < deadZone && axis[3] > deadZone * -1) {
+            bucketMessage = 'stop 0';
+        } else if (axis[3] < deadZone * -1) {
+            rate = Math.round(100 * Math.abs(axis[3]));
+            bucketMessage = 'up' + ' ' + rate.toString();
+        } else if (axis[3] > deadZone) {
+            rate = Math.round(100 * Math.abs(axis[3]));
+            bucketMessage = 'down' + ' ' + rate.toString();
+        }
+        doSend('track_' + motionMessage + '\n' + 'turret_' + turretMessage + '\n' + 'bucket_' + bucketMessage);
     }
 }
 
@@ -144,6 +155,8 @@ function scangamepads() {
 }
 
 function init() {
+    document.getElementById("cam").setAttribute('src', 'http://' + host + ':8080');
+
     doConnect();
     setInterval(updateStatus, 100);
     //updateStatus();

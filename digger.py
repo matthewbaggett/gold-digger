@@ -1,3 +1,4 @@
+#!/usr/bin/python
 # Import GPIO  
 import RPi.GPIO as GPIO  
 from SimpleWebSocketServer import SimpleWebSocketServer, WebSocket
@@ -92,6 +93,19 @@ def turret_ccw(duty=DefaultPWMDuty):
 
 def turret_stop():
     pwmTurret.stop()
+    
+def bucket_up(duty=DefaultPWMDuty):
+    GPIO.output(BucketA, GPIO.LOW)
+    GPIO.output(BucketB, GPIO.HIGH)
+    pwmBucket.start(duty * PWMDutyDivisor)
+    
+def bucket_down(duty=DefaultPWMDuty):
+    GPIO.output(BucketA, GPIO.HIGH)
+    GPIO.output(BucketB, GPIO.LOW)
+    pwmBucket.start(duty * PWMDutyDivisor)
+    
+def bucket_stop():
+    pwmBucket.stop();
 
 def forward(duty=DefaultPWMDuty):
     right_forward(duty);
@@ -134,6 +148,13 @@ class MotionHandler(WebSocket):
                 turret_cw(int(duty))
             if motion == 'turret_stop':
                 turret_stop()
+                
+            if motion == 'bucket_up':
+                bucket_up(int(duty))
+            if motion == 'bucket_down':
+                bucket_down(int(duty))
+            if motion == 'bucket_stop':
+                bucket_stop()
         
     def handleConnected(self):
         print(self.address, 'connected')
