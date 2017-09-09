@@ -207,7 +207,5 @@ c = raw_input("Type something to quit.")
 
 httpd.shutdown();
 
-
- 
 # Always end this script by cleaning the GPIO  
 GPIO.cleanup()  
